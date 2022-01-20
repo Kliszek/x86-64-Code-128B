@@ -31,7 +31,8 @@ encode128:
 
 
 	call load_codes
-	mov	eax, 0				;return 0
+	call generate_header
+	mov	eax, 0			;return 0
 
 	pop	ebp
 	ret
@@ -49,4 +50,25 @@ load_codes:
 	mov edx, 855
 	int 80h
 
+	ret
+
+generate_header:
+	mov eax, [DEST]
+	mov [eax], WORD 0x4d42
+	mov [eax+2], DWORD 90054
+	mov [eax+6], DWORD 0
+	mov [eax+10], DWORD 54
+
+	add eax, 14
+	mov [eax], DWORD 40
+	mov [eax+4], DWORD 600
+	mov [eax+8], DWORD 50
+	mov [eax+12], WORD 1
+	mov [eax+14], WORD 24
+	mov [eax+16], DWORD 0
+	mov [eax+20], DWORD 90000
+	mov [eax+24], DWORD 2835
+	mov [eax+28], DWORD 2835
+	mov [eax+32], DWORD 0
+	mov [eax+36], DWORD 0
 	ret
