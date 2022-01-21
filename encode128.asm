@@ -33,6 +33,7 @@ encode128:
 	call load_codes
 	call generate_header
 	call analyze_input
+	call paint_white
 	mov	eax, 0			;return 0
 
 	mov ecx, 1
@@ -133,4 +134,22 @@ analyze_input:
 	pop ecx
 	pop eax
 	pop ebx
+	ret
+
+paint_white:
+	push eax
+	push ebx
+
+	mov eax, [DEST]
+	add eax, 54
+	mov ebx, eax
+	add ebx, 90000
+  paint_white_loop:
+	mov [eax], DWORD 0xffffffff
+	add eax, 4
+	cmp eax, ebx
+	jl paint_white_loop
+	
+	pop ebx
+	pop eax
 	ret
