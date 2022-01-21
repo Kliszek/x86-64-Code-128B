@@ -19,7 +19,7 @@ section	.text
 global	encode128
 
 encode128:
-	push	ebp
+	push ebp
 	mov	ebp, esp
 
 	mov eax, DWORD [ebp+8]
@@ -29,15 +29,24 @@ encode128:
 	mov eax, DWORD [ebp+16]
 	mov [TEXT], DWORD eax
 
-
+	;mov [eax+2], BYTE 3	;TEST (inject invalid character)
 	call load_codes
 	call generate_header
+	call analyze_input
 	mov	eax, 0			;return 0
 
+	mov ecx, 1
+exit:					;ecx indicates how many values should be popped
 	pop	ebp
+	loop exit
 	ret
 
 load_codes:
+	push eax
+	push ebx
+	push ecx
+	push edx
+
 	mov eax, 5
 	mov ebx, CDFILE
 	mov ecx, 0				;O_RDONLY flag
@@ -50,9 +59,15 @@ load_codes:
 	mov edx, 855
 	int 80h
 
+	pop edx
+	pop ecx
+	pop ebx
+	pop eax
 	ret
 
 generate_header:
+	push eax
+
 	mov eax, [DEST]
 	mov [eax], WORD 0x4d42
 	mov [eax+2], DWORD 90054
@@ -71,4 +86,51 @@ generate_header:
 	mov [eax+28], DWORD 2835
 	mov [eax+32], DWORD 0
 	mov [eax+36], DWORD 0
+
+	pop eax
+	ret
+
+
+analyze_input:
+	push ebx
+	push eax
+	push ecx
+	push edx
+
+	mov ebx, [TEXT]
+	mov edx, 0
+	mov ecx, 6				;pop six values in case of error (4 from this function, return address and the original stack base pointer)
+
+  start_analyzing_input:
+	cmp BYTE [ebx], 0
+	je quit_analyzing_input
+	cmp BYTE [ebx], 10		;LF
+	je quit_analyzing_input	
+	cmp BYTE [ebx], 13		;CR
+	je quit_analyzing_input	
+
+	mov eax, 2				;code error 2 - wrong characters in the string
+
+	cmp BYTE [ebx], 32
+	jl exit
+	cmp BYTE [ebx], 127
+	jg exit
+
+	inc ebx
+	inc edx
+	jmp	start_analyzing_input
+
+  quit_analyzing_input:
+	mov eax, 1				;code error 1 - the string is too long
+
+	imul edx, 11			;one symbol = 11 pixels
+	add edx, 55				;quiet zone + start symbol + checksum + stop symbol + quiet zone
+	imul edx, [BWTH]		;multiplying by bar width
+	cmp edx, 600			;comparing the image length to maximal length (600 pixels)
+	jg exit
+
+	pop edx
+	pop ecx
+	pop eax
+	pop ebx
 	ret

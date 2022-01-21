@@ -8,9 +8,9 @@ extern "C" int encode128(unsigned char* dest_bitmap,
 
 int main(void)
 {
-  char text[] = "Wind On The Hill";
+  char text[] = "123456789";
   unsigned char* dest_bitmap;
-  int bar_width = 1;
+  int bar_width = 2;
   int result;
 
   dest_bitmap = (unsigned char*)malloc(90054);
@@ -23,7 +23,6 @@ int main(void)
   {
 	  case 0:
 	  {
-		  printf("Barcode successfully generated\n");
 		  FILE* output = fopen("output.bmp", "w");
 		  if (!output)
 		  {
@@ -32,6 +31,17 @@ int main(void)
 		  }
 		  fwrite(dest_bitmap, 1, 90054, output);
 		  fclose(output);
+		  printf("Barcode successfully generated\n");
+		  break;
+	  }
+	  case 1:
+	  {
+		  printf("ERROR: Provided string is too long!\n");
+		  break;
+	  }
+	  case 2:
+	  {
+		  printf("ERROR: Provided string contains invalid symbols!\n");
 		  break;
 	  }
 
