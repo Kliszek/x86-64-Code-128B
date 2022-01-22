@@ -29,7 +29,7 @@ encode128:
 	mov eax, DWORD [ebp+16]
 	mov [TEXT], DWORD eax
 
-	;mov [eax+2], BYTE 3	;TEST (inject invalid character)
+
 	call analyze_input
 	call load_codes
 	call generate_header
@@ -37,7 +37,7 @@ encode128:
 	mov edx, 30
 	mov ebx, 1
 
-	call paint_char	
+	call generate_barcode	
 	mov	eax, 0			;return 0
 
 	mov ecx, 1
@@ -187,6 +187,7 @@ paint_bar:					;edx should contain the pixel offset from lhs
 
 paint_char:					;ebx should contain the character code / edx should contain the pixel offset from lhs
 	push eax
+	push ebx
 
 	call get_barcode
 
@@ -216,5 +217,59 @@ paint_char:					;ebx should contain the character code / edx should contain the 
 
   quit_painting_char:
 
+	pop ebx
 	pop eax
+	ret
+
+generate_barcode:
+	push ebx
+	push eax
+	push ecx
+	push edx
+
+	mov ebx, 104			;START_B symbol
+	mov edx, 10
+	imul edx, [BWTH]		;offset (quiet zone)
+
+	call paint_char
+
+	mov ecx, 0
+	mov eax, 104			;checksum
+
+  start_generation:
+	mov ebx, [TEXT]
+	movzx ebx, BYTE [ebx+ecx]
+
+	cmp ebx, 0
+	je finish_generating
+	cmp ebx, 10		;LF
+	je finish_generating
+	cmp ebx, 13		;CR
+	je finish_generating
+
+	sub ebx, 32
+
+	call paint_char
+
+	inc ecx
+	imul ebx, ecx
+	add eax, ebx		;update checksum
+
+	jmp	start_generation
+
+  finish_generating:
+
+	mov bl, 103			;ebx will be reassigned in a moment, it can hold the divider
+	div bl				;checksum = reminder of eax/103
+	movzx ebx, ah
+	
+	call paint_char
+
+	mov ebx, 106
+	call paint_char
+
+	pop edx
+	pop ecx
+	pop eax
+	pop ebx
 	ret
