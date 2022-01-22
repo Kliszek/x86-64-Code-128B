@@ -57,12 +57,22 @@ load_codes:
 	mov ecx, 0				;O_RDONLY flag
 	mov edx, 0444o			;readable by everyone permissions
 	int 80h
+
+	mov ecx, 6				;popping 6 values in case of error
+	cmp eax, 0				;checking if there was an error opening the file
+	mov eax, 3
+	jle exit
 	
 	mov ebx, eax
 	mov eax, 3
 	mov ecx, CODES
 	mov edx, 855
 	int 80h
+
+	mov ecx, 6
+	cmp eax, 0				;checking if there was an error reading the file
+	mov eax, 4
+	jle exit
 
 	pop edx
 	pop ecx
