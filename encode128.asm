@@ -30,10 +30,11 @@ encode128:
 	mov [TEXT], DWORD eax
 
 	;mov [eax+2], BYTE 3	;TEST (inject invalid character)
+	call analyze_input
 	call load_codes
 	call generate_header
-	call analyze_input
 	call paint_white
+
 	mov	eax, 0			;return 0
 
 	mov ecx, 1
@@ -152,4 +153,29 @@ paint_white:
 	
 	pop ebx
 	pop eax
+	ret
+
+get_barcode:				;ebx should contain the character index
+	shl ebx, 3
+	add ebx, [CODES]
+	ret
+	
+paint_bar:					;edx should contain the pixel offset from lhs
+	push ebx
+
+	mov ebx, [DEST]
+	add ebx, 54
+	imul edx, 3
+	add ebx, edx
+	mov edx, ebx
+	add edx, 90000			;edx contains the address of first pixel to paint
+  paint_loop:
+	mov [ebx], BYTE 0
+	mov [ebx+1], BYTE 0
+	mov [ebx+2], BYTE 0
+	add ebx, 1800
+	cmp ebx, edx
+	jl paint_loop
+
+	pop ebx
 	ret
