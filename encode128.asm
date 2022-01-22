@@ -34,7 +34,10 @@ encode128:
 	call load_codes
 	call generate_header
 	call paint_white
+	mov edx, 30
+	mov ebx, 1
 
+	call paint_char	
 	mov	eax, 0			;return 0
 
 	mov ecx, 1
@@ -157,11 +160,12 @@ paint_white:
 
 get_barcode:				;ebx should contain the character index
 	shl ebx, 3
-	add ebx, [CODES]
+	add ebx, CODES
 	ret
 	
 paint_bar:					;edx should contain the pixel offset from lhs
 	push ebx
+	push edx
 
 	mov ebx, [DEST]
 	add ebx, 54
@@ -177,5 +181,40 @@ paint_bar:					;edx should contain the pixel offset from lhs
 	cmp ebx, edx
 	jl paint_loop
 
+	pop edx
 	pop ebx
+	ret
+
+paint_char:					;ebx should contain the character code / edx should contain the pixel offset from lhs
+	push eax
+
+	call get_barcode
+
+  whole_bar:
+	movzx eax, BYTE [ebx]
+	cmp eax, 0
+	je quit_painting_char
+
+	imul eax, [BWTH]			;al * BWTH (= how many 1-pixel bars to paint) is stored in AX!
+	
+	add eax, edx				;eax contains (the first) offset, which should not be painted
+
+  black_part:
+	call paint_bar
+	inc edx
+	cmp edx, eax
+	
+	jl black_part
+
+	movzx eax, BYTE [ebx+1]
+	cmp eax, 0
+	je quit_painting_char
+	imul eax, [BWTH]
+	add edx, eax
+	add ebx, 2
+	jmp whole_bar
+
+  quit_painting_char:
+
+	pop eax
 	ret
