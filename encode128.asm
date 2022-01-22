@@ -58,10 +58,11 @@ load_codes:
 	mov edx, 0444o			;readable by everyone permissions
 	int 80h
 
-	mov ecx, 6				;popping 6 values in case of error
 	cmp eax, 0				;checking if there was an error opening the file
-	mov eax, 3
-	jle exit
+	mov ecx, 3				;if error occurs, contitionally move this to eax
+	cmovle eax, ecx
+	mov ecx, 6				;popping 6 values in case of error
+	jl exit
 	
 	mov ebx, eax
 	mov eax, 3
@@ -69,10 +70,18 @@ load_codes:
 	mov edx, 855
 	int 80h
 
-	mov ecx, 6
 	cmp eax, 0				;checking if there was an error reading the file
 	mov eax, 4
-	jle exit
+	mov ecx, 6
+	jl exit
+
+	mov eax, 6				;closing the file, ebx still contains the descriptor
+	int 80h
+
+	mov ecx, 6
+	cmp eax, 0				;checking if there was an error closing the file
+	mov eax, 3
+	jne exit
 
 	pop edx
 	pop ecx
