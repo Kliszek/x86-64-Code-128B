@@ -34,8 +34,6 @@ encode128:
 	call load_codes
 	call generate_header
 	call paint_white
-	mov edx, 30
-	mov ebx, 1
 
 	call generate_barcode	
 	mov	eax, 0			;return 0
