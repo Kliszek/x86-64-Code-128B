@@ -4,7 +4,8 @@
 
 extern "C" int encode128(unsigned char* dest_bitmap,
 	int bar_width,
-	char* text);
+	char* text,
+	unsigned char* code_table);
 
 int main(void)
 {
@@ -12,12 +13,22 @@ int main(void)
   unsigned char* dest_bitmap;
   int bar_width = 2;
   int result;
+  unsigned char* code_table;
 
   dest_bitmap = (unsigned char*)malloc(90054);
+  code_table = (unsigned char*)malloc(856);
+
+  FILE* codes_file = fopen("code128b.bin", "rb");
+  if (!codes_file)
+  {
+	  printf("ERROR: There was a problem with file 'code128b.bin'!\n");
+	  return 3;
+  }
+  fread(code_table, 1, 855, codes_file);
 
   printf("Input string      > %s\n", text);
 
-  result = encode128(dest_bitmap, bar_width, text);
+  result = encode128(dest_bitmap, bar_width, text, code_table);
   
   switch(result)
   {
