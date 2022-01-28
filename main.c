@@ -25,6 +25,7 @@ int main(void)
 	  return 3;
   }
   fread(code_table, 1, 855, codes_file);
+  fclose(codes_file);
 
   printf("Input string      > %s\n", text);
 
