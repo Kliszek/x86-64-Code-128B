@@ -56,16 +56,6 @@ int main(void)
 		  printf("ERROR: Provided string contains invalid symbols!\n");
 		  break;
 	  }
-	  case 3:
-	  {
-		  printf("ERROR: There was a problem with file 'code128b.bin'!\n");
-		  break;
-	  }
-	  case 4:
-	  {
-		  printf("ERROR: Cannot read file 'code128b.bin'!\n");
-		  break;
-	  }
 
 	  default:
 		  printf("Program returned this value: %i\n", result);
