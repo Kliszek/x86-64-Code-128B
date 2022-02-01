@@ -9,7 +9,6 @@ extern "C" int encode128(unsigned char* dest_bitmap,
 
 int main(void)
 {
-  char text[] = "123456789";
   unsigned char* dest_bitmap;
   int bar_width = 2;
   int result;
@@ -17,6 +16,12 @@ int main(void)
 
   dest_bitmap = (unsigned char*)malloc(90054);
   code_table = (unsigned char*)malloc(856);
+
+  char text[] = "123456789";
+
+  //char text[21];
+  //printf("Please type the string: ");
+  //scanf("%20s", &text);
 
   FILE* codes_file = fopen("code128b.bin", "rb");
   if (!codes_file)
